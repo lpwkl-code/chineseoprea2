@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-HK">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>粵劇詩白・數白欖 填字創作坊</title>
+<style>
+:root{--red:#9b1c1c;--dark:#5a0f0f;--gold:#d4a017;--cream:#fdf7ea;--line:#e7d9bf}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Noto Serif TC","Songti TC","PMingLiU","Microsoft JhengHei",serif;background:var(--cream);color:#2b2b2b;line-height:1.6}
+header{background:linear-gradient(135deg,var(--dark),var(--red));color:#fff;padding:18px;text-align:center;border-bottom:4px solid var(--gold)}
+header h1{margin:0;font-size:28px;letter-spacing:4px}
+header p{margin:6px 0 0;opacity:.9;font-size:14px}
+nav{display:flex;justify-content:center;gap:10px;padding:12px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+nav button{font:inherit;font-size:18px;padding:8px 26px;border:2px solid var(--red);background:#fff;color:var(--red);border-radius:999px;cursor:pointer}
+nav button.on{background:var(--red);color:#fff}
+main{max-width:960px;margin:0 auto;padding:16px}
+.tab{display:none}.tab.on{display:block}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:16px;box-shadow:0 2px 6px rgba(0,0,0,.04)}
+.card h2{margin:0 0 8px;color:var(--red);font-size:20px;border-left:5px solid var(--gold);padding-left:10px}
+.intro{background:#fffaf0}.intro ul{margin:6px 0;padding-left:22px}
+.btn{font:inherit;font-size:15px;padding:7px 14px;border-radius:8px;border:1px solid var(--red);background:#fff;color:var(--red);cursor:pointer;margin:3px}
+.btn.primary{background:var(--red);color:#fff}
+.btn.gold{background:var(--gold);border-color:var(--gold);color:#3a2a00}
+.btn.ghost{border-color:#bbb;color:#555}
+input[type=text],select{font:inherit;font-size:16px;padding:7px 10px;border:1px solid #c9b48a;border-radius:8px;background:#fffdf7}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0}
+.line{border:1px dashed #d9c7a0;border-radius:10px;padding:12px;margin:12px 0;background:#fffdf8}
+.line.speaking{background:#fff3d6;border-color:var(--gold)}
+.line.g0{border-left:5px solid #c9a96a}
+.line.g1{border-left:5px solid #7a9cc6}
+.lbl{font-weight:bold;color:var(--dark);margin-right:8px}
+.gtag{font-size:12px;border-radius:999px;padding:1px 8px;margin-right:6px;color:#fff}
+.gtag.g0{background:#c9a96a}.gtag.g1{background:#7a9cc6}
+.boxes{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:8px 0}
+.cbox{width:58px;height:58px;border:2px dashed #c9a96a;border-radius:8px;text-align:center;font-size:30px;font-family:inherit;background:#fff;padding:0;ime-mode:active}
+.cbox:focus{outline:none;border:2px solid var(--gold);background:#fffbe8}
+.cbox.filled{border:2px solid var(--red)}
+.cbox.composing{font-size:13px;color:#777;letter-spacing:-1px;border:2px solid #999;background:#f4f4f4}
+.whole{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:14px;color:#666}
+.whole input{flex:1;min-width:200px;font-size:18px;letter-spacing:2px}
+.perc{display:inline-flex;align-items:center;gap:3px;background:#fdebc8;border:1px solid #e3c27a;border-radius:999px;padding:4px 12px;font-size:18px;margin-left:8px}
+.sym{display:inline-block;padding:0 3px;border-radius:4px;transition:all .08s}
+.sym.dik{color:#7a4b00}.sym.caang{color:var(--red);font-weight:bold}
+.sym.on{background:var(--red);color:#fff;transform:scale(1.3)}
+.mini{border:none;background:var(--red);color:#fff;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:12px;margin-left:6px}
+.preview{white-space:pre-wrap;font-size:22px;line-height:2;background:#fffef9;border:1px solid var(--line);border-radius:8px;padding:14px;text-align:center;min-height:60px}
+.note{font-size:13px;color:#777}
+.beats{display:flex;gap:10px;align-items:center}
+.dot{width:22px;height:22px;border-radius:50%;background:#e5d9c0;border:2px solid #c9a96a;transition:all .05s}
+.dot.on{background:var(--red);border-color:var(--red);transform:scale(1.25)}
+/* 押韻詞庫 */
+.rhyme{background:#fffaf0;border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:12px 0}
+.rword{font:inherit;font-size:22px;width:44px;height:44px;border:1px solid #c9b79c;background:#fffdf7;color:#333;border-radius:8px;cursor:pointer}
+.rword:hover{background:#fdebc8;border-color:var(--gold)}
+.rstat{font-size:13px;color:#777;margin-left:8px}
+.status{display:block;font-size:15px;font-weight:bold;color:#777;margin:2px 0}
+.rstat.ok,.status.ok{color:#2e7d32}.rstat.bad,.status.bad{color:#b71c1c}
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 18px;border-radius:999px;opacity:0;transition:.3s;pointer-events:none;max-width:90vw;text-align:center}
+#toast.show{opacity:1}
+@media print{header,nav,.noprint,.whole{display:none!important}.card{border:none;box-shadow:none}}
+</style>
+</head>
+<body>
+<header>
+  <h1>粵劇詩白・數白欖 填字創作坊</h1>
+  <p>填字 ・ 押韻 ・ 聽鑼鼓 ・ 朗讀 —— 寫出自己的粵韻</p>
+</header>
+<nav>
+  <button data-tab="sb" class="on">① 詩白</button>
+  <button data-tab="sbl">② 數白欖</button>
+</nav>
+<main>
+
+<!-- ============ ① 詩白 ============ -->
+<section id="tab-sb" class="tab on">
+  <div class="card intro">
+    <h2>詩白是什麼？</h2>
+    <p>詩白是粵劇人物出場或抒情時「唸」出來的詩句。每唸完一句，樂師便打鑼鼓作停頓：</p>
+    <ul>
+      <li>第一句 <b>7 個字</b>　→ <b>的撐</b>（沙的一下、大鈸一下）</li>
+      <li>第二句 <b>7 個字</b>　→ <b>的撐</b>（沙的一下、大鈸一下）</li>
+      <li>第三句 <b>7 個字</b>　→ <b>的撐</b>（沙的一下、大鈸一下）</li>
+      <li>第四句 <b>4 個字</b>　→ <b>的的的的的</b>（沙的連打）</li>
+      <li>第五句 <b>3 個字</b>　→ <b>的的撐撐的的撐</b>（沙的 + 大鈸）</li>
+    </ul>
+    <p class="note">填字方法：可用速成、筆劃、倉頡、手寫等任何輸入法，逐格打字，選好字後會自動跳到下一格；亦可在每句下方「整句輸入」欄打整句，程式會自動分配到格仔。<br>
+    押韻規則：<b>第一、二、三句</b>尾字要同韻（韻組 A）；<b>第四、五句</b>尾字要同韻（韻組 B）。可用下方「押韻詞庫」幫忙。</p>
+    <div class="row noprint">
+      <span>試聽：</span>
+      <button class="btn gold" onclick="initAudio();playDik(ctx.currentTime+.02)">的（沙的）</button>
+      <button class="btn gold" onclick="initAudio();playCaang(ctx.currentTime+.02)">撐（大鈸）</button>
+      <button class="btn ghost" onclick="loadSampleSB()">載入示範</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>我的詩白</h2>
+    <div class="row">
+      <label>學生姓名 <input type="text" id="sbName" placeholder="姓名"></label>
+      <label>題目 <input type="text" id="sbTitle" placeholder="例如：春日"></label>
+    </div>
+    <div id="sbLines"></div>
+    <!-- 押韻詞庫面板由 JS 插入此處 -->
+    <div class="row noprint">
+      <button class="btn primary" onclick="reciteSB(true)">▶ 朗讀全首（配鑼鼓）</button>
+      <button class="btn" onclick="reciteSB(false)">▶ 只播鑼鼓</button>
+      <button class="btn ghost" onclick="stopAll()">■ 停止</button>
+      <button class="btn" onclick="copyText(sbText())">複製全文</button>
+      <button class="btn" onclick="window.print()">列印</button>
+      <button class="btn ghost" onclick="clearBoxes('sb')">清除</button>
+    </div>
+    <h3>完成稿</h3>
+    <div class="preview" id="sbPreview"></div>
+    <p class="note">朗讀使用瀏覽器語音功能，需要系統有粵語（zh-HK）語音；如無，可能會以普通話讀出。</p>
+  </div>
+</section>
+
+<!-- ============ ② 數白欖 ============ -->
+<section id="tab-sbl" class="tab">
+  <div class="card intro">
+    <h2>數白欖是什麼？</h2>
+    <p>數白欖是粵劇的「說唱」形式：演員跟著<b>卜魚</b>均勻的「的、的、的」節拍，一句接一句數出來，節奏明快，句尾押韻，像講故事一樣。</p>
+    <ul>
+      <li>句數不限，通常兩句一組，句尾押韻</li>
+      <li>每句字數可以相同（常見 5–7 字），亦可長短句</li>
+      <li>每句最後一個字要落在拍子上</li>
+    </ul>
+    <div class="row noprint">
+      <span>試聽：</span>
+      <button class="btn gold" onclick="initAudio();playDik(ctx.currentTime+.02)">卜魚</button>
+      <button class="btn ghost" onclick="loadSampleSBL()">載入示範</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>我的數白欖</h2>
+    <div class="row">
+      <label>學生姓名 <input type="text" id="sblName" placeholder="姓名"></label>
+      <label>題目 <input type="text" id="sblTitle" placeholder="例如：我的學校"></label>
+      <label>每句字數
+        <select id="sblN" onchange="rebuildSBL()">
+          <option>4</option><option>5</option><option>6</option><option selected>7</option><option>8</option><option>9</option><option>10</option>
+        </select>
+      </label>
+      <label>句數
+        <select id="sblRows" onchange="rebuildSBL()">
+          <option>2</option><option selected>4</option><option>6</option><option>8</option><option>10</option><option>12</option>
+        </select>
+      </label>
+    </div>
+    <div id="sblLines"></div>
+
+    <h3>卜魚節拍器</h3>
+    <div class="row noprint">
+      <label>速度 <input type="range" id="bpm" min="50" max="160" value="96" oninput="document.getElementById('bpmV').textContent=this.value"> <span id="bpmV">96</span> 拍/分</label>
+      <button class="btn gold" id="metroBtn" onclick="toggleMetro()">▶ 開始節拍</button>
+      <div class="beats"><span class="dot" id="d0"></span><span class="dot" id="d1"></span><span class="dot" id="d2"></span><span class="dot" id="d3"></span></div>
+    </div>
+    <div class="row noprint">
+      <button class="btn primary" onclick="reciteSBL()">▶ 朗讀全首（配卜魚）</button>
+      <button class="btn ghost" onclick="stopAll()">■ 停止</button>
+      <button class="btn" onclick="copyText(sblText())">複製全文</button>
+      <button class="btn" onclick="window.print()">列印</button>
+      <button class="btn ghost" onclick="clearBoxes('sbl')">清除</button>
+    </div>
+    <h3>完成稿</h3>
+    <div class="preview" id="sblPreview"></div>
+  </div>
+</section>
+</main>
+<div id="toast"></div>
+
+<script>
+/* ---------- 分頁 ---------- */
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('nav button').forEach(x=>x.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');document.getElementById('tab-'+b.dataset.tab).classList.add('on');stopAll();
+});
+function toast(m,ms=1500){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),ms)}
+function copyText(t){navigator.clipboard?.writeText(t).then(()=>toast('已複製'))}
+
+/* ---------- 音效（Web Audio 合成） ---------- */
+let ctx=null;
+function initAudio(){if(!ctx)ctx=new (window.AudioContext||window.webkitAudioContext)();if(ctx.state==='suspended')ctx.resume();}
+function playDik(t){ /* 沙的／卜魚 */
+  const o=ctx.createOscillator(),g=ctx.createGain();
+  o.type='square';o.frequency.setValueAtTime(2200,t);o.frequency.exponentialRampToValueAtTime(900,t+.05);
+  g.gain.setValueAtTime(.5,t);g.gain.exponentialRampToValueAtTime(.001,t+.09);
+  o.connect(g).connect(ctx.destination);o.start(t);o.stop(t+.1);
+  const len=ctx.sampleRate*.04,buf=ctx.createBuffer(1,len,ctx.sampleRate),d=buf.getChannelData(0);
+  for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*(1-i/len);
+  const n=ctx.createBufferSource(),ng=ctx.createGain(),f=ctx.createBiquadFilter();
+  n.buffer=buf;f.type='highpass';f.frequency.value=3000;ng.gain.value=.4;
+  n.connect(f).connect(ng).connect(ctx.destination);n.start(t);
+}
+function playCaang(t){ /* 大鈸（兩片金屬互擊：明亮「鏘」聲 + 金屬沙質餘響） */
+  const len=Math.floor(ctx.sampleRate*1.4),buf=ctx.createBuffer(1,len,ctx.sampleRate),d=buf.getChannelData(0);
+  for(let i=0;i<len;i++)d[i]=Math.random()*2-1;
+  const n=ctx.createBufferSource();n.buffer=buf;
+  const bp=ctx.createBiquadFilter();bp.type='bandpass';bp.Q.value=.6;
+  bp.frequency.setValueAtTime(6000,t);bp.frequency.exponentialRampToValueAtTime(3000,t+1.1);
+  const hp=ctx.createBiquadFilter();hp.type='highpass';hp.frequency.value=1800;
+  const ng=ctx.createGain();
+  ng.gain.setValueAtTime(0,t);ng.gain.linearRampToValueAtTime(.9,t+.006);
+  ng.gain.exponentialRampToValueAtTime(.25,t+.25);ng.gain.exponentialRampToValueAtTime(.001,t+1.3);
+  n.connect(bp).connect(hp).connect(ng).connect(ctx.destination);n.start(t);n.stop(t+1.4);
+  [[2630,.5,1.0],[3410,.42,.9],[4260,.35,.8],[5170,.28,.7],[6380,.2,.55],[7920,.14,.45]].forEach(([fr,v,dur])=>{
+    const o=ctx.createOscillator(),g=ctx.createGain();
+    o.type='triangle';o.frequency.setValueAtTime(fr*1.03,t);o.frequency.exponentialRampToValueAtTime(fr,t+.1);
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v*.16,t+.004);g.gain.exponentialRampToValueAtTime(.001,t+dur);
+    o.connect(g).connect(ctx.destination);o.start(t);o.stop(t+dur+.05);
+  });
+  const k=ctx.createOscillator(),kg=ctx.createGain();
+  k.type='square';k.frequency.setValueAtTime(5200,t);k.frequency.exponentialRampToValueAtTime(2400,t+.03);
+  kg.gain.setValueAtTime(.3,t);kg.gain.exponentialRampToValueAtTime(.001,t+.05);
+  k.connect(kg).connect(ctx.destination);k.start(t);k.stop(t+.06);
+}
+let timers=[];
+function playPattern(pattern,el,cb){
+  initAudio();
+  const gap=.28;let t=ctx.currentTime+.05;
+  const syms=el?el.querySelectorAll('.sym'):[];
+  [...pattern].forEach((c,i)=>{
+    const when=t+i*gap;
+    if(c==='撐')playCaang(when);else playDik(when);
+    timers.push(setTimeout(()=>{syms.forEach(s=>s.classList.remove('on'));syms[i]?.classList.add('on');},(when-ctx.currentTime)*1000));
+  });
+  const total=(pattern.length*gap+(pattern.endsWith('撐')?1.2:.4))*1000;
+  timers.push(setTimeout(()=>{syms.forEach(s=>s.classList.remove('on'));cb&&cb();},total));
+}
+function stopAll(){timers.forEach(clearTimeout);timers=[];speechSynthesis.cancel();stopMetro();
+  document.querySelectorAll('.speaking').forEach(e=>e.classList.remove('speaking'));document.querySelectorAll('.sym.on').forEach(e=>e.classList.remove('on'));}
+
+/* ---------- 朗讀（粵語） ---------- */
+function speak(text,cb){
+  if(!('speechSynthesis'in window)||!text){cb&&cb();return;}
+  const u=new SpeechSynthesisUtterance(text);u.lang='zh-HK';u.rate=.85;
+  const v=speechSynthesis.getVoices().find(v=>/zh[-_]HK|yue|Cantonese/i.test(v.lang+v.name));if(v)u.voice=v;
+  u.onend=()=>cb&&cb();u.onerror=()=>cb&&cb();speechSynthesis.speak(u);
+}
+
+/* ---------- 填字格（支援速成／筆劃等輸入法組字） ---------- */
+function onlyHan(str){return [...str].filter(c=>!/[\x00-\x7f\s，。、！？「」；：（）]/.test(c))}
+const lastBox={sb:null,sbl:null};   /* 記住每組最後點選的格仔（押韻詞庫填字用） */
+
+function buildBoxes(container,n,group){
+  const wrap=document.createElement('div');wrap.className='boxes';
+  const boxes=[];
+  for(let i=0;i<n;i++){
+    const inp=document.createElement('input');inp.type='text';inp.className='cbox';inp.dataset.group=group;
+    inp.autocomplete='off';inp.spellcheck=false;
+    let composing=false;
+    const commit=()=>{
+      if(composing)return;
+      const chars=onlyHan(inp.value);
+      if(!chars.length){inp.value='';inp.classList.remove('filled');syncWhole(wrap);updatePreview(group);return;}
+      chars.forEach((ch,k)=>{if(boxes[i+k]){boxes[i+k].value=ch;boxes[i+k].classList.add('filled')}});
+      syncWhole(wrap);updatePreview(group);
+      const nextIdx=i+chars.length;
+      if(boxes[nextIdx])boxes[nextIdx].focus();
+      else{const nextLine=wrap.closest('.line').nextElementSibling;const nb=nextLine&&nextLine.querySelector('.cbox');if(nb)nb.focus();}
+    };
+    inp.addEventListener('compositionstart',()=>{composing=true;inp.classList.add('composing')});
+    inp.addEventListener('compositionend',()=>{composing=false;inp.classList.remove('composing');setTimeout(commit,0)});
+    inp.addEventListener('input',e=>{if(composing||e.isComposing)return;setTimeout(commit,0)});
+    inp.addEventListener('focus',()=>{lastBox[group]=inp;if(inp.value)inp.select();if(group==='sb'&&typeof onSbFocus==='function')onSbFocus(inp)});
+    inp.addEventListener('keydown',e=>{
+      if(e.isComposing||e.keyCode===229)return;
+      if(e.key==='Backspace'&&!inp.value){boxes[i-1]?.focus();e.preventDefault();}
+      if(e.key==='Delete'){inp.value='';inp.classList.remove('filled');syncWhole(wrap);updatePreview(group);}
+      if(e.key==='ArrowLeft')boxes[i-1]?.focus();
+      if(e.key==='ArrowRight'||e.key==='Enter'){e.preventDefault();boxes[i+1]?.focus();}
+    });
+    boxes.push(inp);wrap.appendChild(inp);
+  }
+  container.appendChild(wrap);
+
+  const whole=document.createElement('div');whole.className='whole noprint';
+  whole.innerHTML=`<span>整句輸入：</span><input type="text" class="wholeInp" placeholder="在此打整句（${n} 字），會自動分配到格仔">`;
+  const wi=whole.querySelector('input');let wComposing=false;
+  const applyWhole=()=>{
+    if(wComposing)return;
+    const chars=onlyHan(wi.value).slice(0,n);
+    boxes.forEach((b,k)=>{b.value=chars[k]||'';b.classList.toggle('filled',!!b.value)});
+    updatePreview(group);
+  };
+  wi.addEventListener('compositionstart',()=>wComposing=true);
+  wi.addEventListener('compositionend',()=>{wComposing=false;setTimeout(applyWhole,0)});
+  wi.addEventListener('input',e=>{if(wComposing||e.isComposing)return;setTimeout(applyWhole,0)});
+  container.appendChild(whole);
+  return wrap;
+}
+function syncWhole(wrap){const wi=wrap.parentElement.querySelector('.wholeInp');if(wi)wi.value=[...wrap.querySelectorAll('.cbox')].map(b=>b.value).join('')}
+function lineText(lineEl){return [...lineEl.querySelectorAll('.cbox')].map(b=>b.value).join('')}
+function fillLine(lineEl,str){const bs=lineEl.querySelectorAll('.cbox');[...str].forEach((c,i)=>{if(bs[i]){bs[i].value=c;bs[i].classList.add('filled')}});syncWhole(lineEl.querySelector('.boxes'))}
+function clearBoxes(group){document.querySelectorAll(`#${group}Lines .cbox`).forEach(b=>{b.value='';b.classList.remove('filled')});document.querySelectorAll(`#${group}Lines .wholeInp`).forEach(w=>w.value='');updatePreview(group)}
+function updatePreview(group){group==='sb'?updateSB():updateSBL()}
+function percHTML(p){return [...p].map(c=>`<span class="sym ${c==='撐'?'caang':'dik'}">${c}</span>`).join('')}
+
+/* ===================== 押韻詞庫（將 0243.hk 數據貼入 RHYMES） ===================== */
+/* 格式：韻部名 → 該韻部的字。如果 0243.hk 係「字→韻」格式，用下面 fromDict() 轉換 */
+const RHYMES = {
+  "aa（花家）":   ["花","家","霞","華","沙","茶","瓜","蝦","牙","加"],
+  "oeng（香揚）": ["香","揚","陽","洋","長","娘","涼","牆","強","張"],
+  "ung（東風）":  ["東","風","中","紅","空","通","功","濛","鍾","窮"],
+  "ing（星明）":  ["星","明","清","情","聲","晴","輕","城","靈","寧"],
+  "au（秋愁）":   ["秋","愁","流","樓","舟","悠","柔","留","遊","頭"],
+  "ei（飛機）":   ["飛","機","微","悲","離","知","時","衣","詩","期"],
+  // ← 把 0243.hk 的韻部全部貼在這裡
+};
+/* 如果 0243.hk 係 { "東":"ung", "風":"ung" } 格式，解除下面註解即可自動轉換：
+const RHYMES = fromDict({ "東":"ung", "風":"ung", ... });
+*/
+function fromDict(d){ const r={}; for(const [ch,k] of Object.entries(d)) (r[k]=r[k]||[]).push(ch); return r; }
+
+/* 押韻分組（句號 0 起計）：
+   韻組 A = 第一至三句（7 字句）尾字同韻
+   韻組 B = 第四、五句（4 字句 + 3 字句）尾字同韻
+   想改規則只需改這裡。 */
+const RHYME_GROUPS = [
+  { id:'g0', name:'第一至三句（韻組 A）', lines:[0,1,2] },
+  { id:'g1', name:'第四、五句（韻組 B）', lines:[3,4] }
+];
+const charRhyme = ch => Object.keys(RHYMES).find(k=>RHYMES[k].includes(ch)) || null;
+const groupOfLine = i => RHYME_GROUPS.find(g=>g.lines.includes(i)) || null;
+
+/* ---------- 詩白（五句式：7・7・7・4・3） ---------- */
+const SB=[
+  {n:7,p:'的撐'},
+  {n:7,p:'的撐'},
+  {n:7,p:'的撐'},
+  {n:4,p:'的的的的的'},
+  {n:3,p:'的的撐撐的的撐'}
+];
+const NUM='一二三四五';
+const sbLines=document.getElementById('sbLines');
+SB.forEach((L,i)=>{
+  const g=groupOfLine(i);
+  const div=document.createElement('div');div.className='line'+(g?' '+g.id:'');div.id='sbL'+i;
+  div.innerHTML=`${g?`<span class="gtag ${g.id}">韻組 ${g.id==='g0'?'A':'B'}</span>`:''}<span class="lbl">第${NUM[i]}句（${L.n} 字）</span>
+    <span class="perc">（${percHTML(L.p)}）<button class="mini noprint" title="試聽鑼鼓" onclick="playPattern('${L.p}',document.getElementById('sbL${i}'))">▶</button></span>
+    <button class="btn ghost noprint" style="padding:3px 10px;font-size:13px" onclick="reciteOneSB(${i})">朗讀此句</button>
+    <span class="rstat" id="sbR${i}"></span>`;
+  buildBoxes(div,L.n,'sb');sbLines.appendChild(div);
+});
+
+/* 押韻詞庫面板：插在五句格仔之後 */
+const rpanel=document.createElement('div');rpanel.className='rhyme noprint';
+rpanel.innerHTML=`
+  <div class="row">
+    <b style="color:var(--red)">押韻詞庫</b>
+    <select id="rhymeSel"><option value="">— 揀韻部 —</option>
+      ${Object.keys(RHYMES).map(k=>`<option>${k}</option>`).join('')}</select>
+    <button class="btn gold" style="padding:5px 14px" onclick="checkRhymeNow()">✔ 檢查押韻</button>
+  </div>
+  <div id="rhymeWords" style="display:flex;gap:6px;flex-wrap:wrap;margin:8px 0"></div>
+  <div id="rhymeMsgs">${RHYME_GROUPS.map(g=>`<span class="status" id="rhymeMsg_${g.id}"></span>`).join('')}</div>
+  <p class="note" style="margin:8px 0 0">用法：先點選要填的格仔（例如句尾一格），再按韻字即可填入。
+  點選某句格仔時，若同組已有句子填好尾字，會自動顯示該韻部的字。按「檢查押韻」可一次總結兩組結果。</p>`;
+sbLines.after(rpanel);
+
+function showRhyme(k){
+  const sel=document.getElementById('rhymeSel');if(sel.value!==k)sel.value=k||'';
+  const box=document.getElementById('rhymeWords');box.innerHTML='';
+  (RHYMES[k]||[]).forEach(ch=>{
+    const b=document.createElement('button');b.className='rword';b.textContent=ch;b.title='填入所選格仔';
+    b.onclick=()=>insertRhymeChar(ch);box.appendChild(b);
+  });
+}
+document.getElementById('rhymeSel').onchange=e=>showRhyme(e.target.value);
+function insertRhymeChar(ch){
+  let inp=lastBox.sb||document.querySelector('#sbL0 .cbox:last-child');
+  inp.value=ch;inp.classList.add('filled');
+  const wrap=inp.closest('.boxes');syncWhole(wrap);updateSB();
+  const bs=[...wrap.querySelectorAll('.cbox')],i=bs.indexOf(inp);
+  (bs[i+1]||inp).focus();
+}
+
+/* 取得某句尾字及其韻部 */
+function lineEnd(i){
+  const el=document.getElementById('sbL'+i);if(!el)return null;
+  const chars=[...lineText(el)],last=chars[chars.length-1];
+  return last?{i,last,k:charRhyme(last)}:null;
+}
+/* 檢查一個韻組，回傳 {state:'none'|'wait'|'ok'|'bad', text} */
+function checkGroup(g){
+  const ends=g.lines.map(lineEnd).filter(Boolean);
+  const names=g.lines.map(j=>NUM[j]).join('、');
+  if(ends.length<2)return{state:'none',text:`${g.name}：請先填好第${names}句尾字`};
+  const unknown=ends.filter(e=>!e.k);
+  if(unknown.length)return{state:'bad',text:`✗ ${g.name}：${unknown.map(e=>`「${e.last}」`).join('')}不在詞庫，未能判斷`};
+  const ks=[...new Set(ends.map(e=>e.k))];
+  const partial=ends.length<g.lines.length?'（尚有句子未填）':'';
+  if(ks.length===1)return{state:'ok',text:`✓ ${g.name}押韻：${ends.map(e=>e.last).join('、')} 同屬 ${ks[0]}${partial}`};
+  return{state:'bad',text:`✗ ${g.name}未同韻：${ends.map(e=>`${e.last}（${e.k}）`).join(' / ')}`};
+}
+/* 每句尾字提示 + 兩組結果 */
+function rhymeCheck(){
+  RHYME_GROUPS.forEach(g=>g.lines.forEach(i=>{
+    const st=document.getElementById('sbR'+i),e=lineEnd(i);if(!st)return;
+    if(!e){st.textContent='';st.className='rstat';return;}
+    st.textContent=e.k?`尾字「${e.last}」屬 ${e.k}`:`尾字「${e.last}」不在詞庫`;st.className='rstat'+(e.k?'':' bad');
+  }));
+  const results={};
+  RHYME_GROUPS.forEach(g=>{
+    const r=checkGroup(g);results[g.id]=r;
+    const msg=document.getElementById('rhymeMsg_'+g.id);if(!msg)return;
+    msg.textContent=r.state==='none'?'':r.text;
+    msg.className='status'+(r.state==='ok'?' ok':r.state==='bad'?' bad':'');
+  });
+  return results;
+}
+/* 「檢查押韻」按鈕：即時總結兩組 */
+function checkRhymeNow(){
+  const r=rhymeCheck();
+  const lines=RHYME_GROUPS.map(g=>r[g.id].text);
+  const allOk=RHYME_GROUPS.every(g=>r[g.id].state==='ok');
+  toast((allOk?'🎉 兩組都押韻！　':'')+lines.join('　｜　'),3500);
+}
+/* 點選格仔時，自動顯示該句所屬韻組的韻字 */
+function onSbFocus(inp){
+  const li=+inp.closest('.line').id.replace('sbL','');
+  const g=groupOfLine(li);if(!g)return;
+  const known=g.lines.map(lineEnd).find(e=>e&&e.k&&e.i!==li)||g.lines.map(lineEnd).find(e=>e&&e.k);
+  if(known)showRhyme(known.k);
+}
+
+function sbText(){
+  const title=document.getElementById('sbTitle').value,name=document.getElementById('sbName').value;
+  let s=(title?`《${title}》`:'')+(name?`　${name}`:'')+(title||name?'\n':'');
+  SB.forEach((L,i)=>{s+=`${lineText(document.getElementById('sbL'+i))}　（${L.p}）\n`});return s.trim();
+}
+function updateSB(){document.getElementById('sbPreview').textContent=sbText();rhymeCheck();}
+document.getElementById('sbTitle').oninput=document.getElementById('sbName').oninput=updateSB;
+function reciteOneSB(i,cb){
+  const el=document.getElementById('sbL'+i);stopAll();el.classList.add('speaking');
+  speak(lineText(el),()=>playPattern(SB[i].p,el,()=>{el.classList.remove('speaking');cb&&cb()}));
+}
+function reciteSB(withVoice){
+  stopAll();initAudio();let i=0;
+  const next=()=>{if(i>=SB.length)return;const el=document.getElementById('sbL'+i),k=i++;
+    el.classList.add('speaking');
+    const after=()=>playPattern(SB[k].p,el,()=>{el.classList.remove('speaking');next()});
+    withVoice?speak(lineText(el),after):after();};
+  next();
+}
+function loadSampleSB(){
+  clearBoxes('sb');document.getElementById('sbTitle').value='春日';
+  /* 韻組 A：花／霞／家（aa）　韻組 B：香／洋（oeng） */
+  ['春風吹綻滿園花','蝶舞鶯啼映彩霞','燕子雙雙歸舊家','鳥語花香','樂洋洋'].forEach((s,i)=>fillLine(document.getElementById('sbL'+i),s));updateSB();
+}
+updateSB();
+
+/* ---------- 數白欖 ---------- */
+function rebuildSBL(){
+  const n=+document.getElementById('sblN').value,rows=+document.getElementById('sblRows').value;
+  const old=[...document.querySelectorAll('#sblLines .line')].map(lineText);
+  const c=document.getElementById('sblLines');c.innerHTML='';
+  for(let i=0;i<rows;i++){
+    const div=document.createElement('div');div.className='line';div.id='sblL'+i;
+    div.innerHTML=`<span class="lbl">第 ${i+1} 句</span><span class="perc">（${percHTML('的'.repeat(Math.min(n,4)))}…）</span>
+      <button class="btn ghost noprint" style="padding:3px 10px;font-size:13px" onclick="reciteOneSBL(${i})">朗讀此句</button>`;
+    buildBoxes(div,n,'sbl');c.appendChild(div);if(old[i])fillLine(div,old[i]);
+  }
+  updateSBL();
+}
+function sblText(){
+  const title=document.getElementById('sblTitle').value,name=document.getElementById('sblName').value;
+  let s=(title?`《${title}》`:'')+(name?`　${name}`:'')+(title||name?'\n':'');
+  document.querySelectorAll('#sblLines .line').forEach((el,i)=>{const t=lineText(el);if(t)s+=t+(i%2?'。':'，')+'\n'});return s.trim();
+}
+function updateSBL(){document.getElementById('sblPreview').textContent=sblText()}
+document.getElementById('sblTitle').oninput=document.getElementById('sblName').oninput=updateSBL;
+function reciteOneSBL(i,cb){
+  const el=document.getElementById('sblL'+i);if(!el)return;el.classList.add('speaking');
+  playPattern('的的',el,()=>speak(lineText(el),()=>playPattern('的',el,()=>{el.classList.remove('speaking');cb&&cb()})));
+}
+function reciteSBL(){stopAll();initAudio();const lines=[...document.querySelectorAll('#sblLines .line')].filter(l=>lineText(l));let i=0;
+  const next=()=>{if(i>=lines.length)return;const idx=+lines[i++].id.replace('sblL','');reciteOneSBL(idx,next)};next();}
+function loadSampleSBL(){
+  document.getElementById('sblN').value='7';document.getElementById('sblRows').value='4';rebuildSBL();document.getElementById('sblTitle').value='我的學校';
+  ['我校坐落山腳邊','老師同學笑開顏','早晨讀書聲朗朗','放學遊戲樂翻天'].forEach((s,i)=>fillLine(document.getElementById('sblL'+i),s));updateSBL();
+}
+rebuildSBL();
+
+/* ---------- 卜魚節拍器 ---------- */
+let metroOn=false,metroTimer=null,beat=0;
+function toggleMetro(){metroOn?stopMetro():startMetro()}
+function startMetro(){
+  initAudio();metroOn=true;document.getElementById('metroBtn').textContent='■ 停止節拍';beat=0;
+  const tick=()=>{if(!metroOn)return;playDik(ctx.currentTime+.01);
+    document.querySelectorAll('.dot').forEach(d=>d.classList.remove('on'));document.getElementById('d'+(beat%4)).classList.add('on');beat++;
+    metroTimer=setTimeout(tick,60000/+document.getElementById('bpm').value)};
+  tick();
+}
+function stopMetro(){metroOn=false;clearTimeout(metroTimer);const b=document.getElementById('metroBtn');if(b)b.textContent='▶ 開始節拍';document.querySelectorAll('.dot').forEach(d=>d.classList.remove('on'))}
+if('speechSynthesis'in window)speechSynthesis.getVoices();
+</script>
+</body>
+</html>
