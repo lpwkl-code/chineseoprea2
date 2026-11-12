@@ -29,6 +29,7 @@ input[type=text],select{font:inherit;font-size:16px;padding:7px 10px;border:1px 
 .line.speaking{background:#fff3d6;border-color:var(--gold)}
 .line.g0{border-left:5px solid #c9a96a}
 .line.g1{border-left:5px solid #7a9cc6}
+.line.repline{border-left:5px solid #7a9cc6}
 .lbl{font-weight:bold;color:var(--dark);margin-right:8px}
 .gtag{font-size:12px;border-radius:999px;padding:1px 8px;margin-right:6px;color:#fff}
 .gtag.g0{background:#c9a96a}.gtag.g1{background:#7a9cc6}
@@ -37,6 +38,10 @@ input[type=text],select{font:inherit;font-size:16px;padding:7px 10px;border:1px 
 .cbox:focus{outline:none;border:2px solid var(--gold);background:#fffbe8}
 .cbox.filled{border:2px solid var(--red)}
 .cbox.composing{font-size:13px;color:#777;letter-spacing:-1px;border:2px solid #999;background:#f4f4f4}
+/* 重覆尾三字的格仔（自動填入，不可直接編輯） */
+.cbox.rep{border:2px dashed #7a9cc6;background:#eef3fa;color:#2b4a7a;cursor:default}
+.cbox.rep.filled{border-style:solid}
+.repsep{margin:0 4px 0 10px;color:#7a9cc6;font-size:13px;white-space:nowrap}
 .whole{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:14px;color:#666}
 .whole input{flex:1;min-width:200px;font-size:18px;letter-spacing:2px}
 .perc{display:inline-flex;align-items:center;gap:3px;background:#fdebc8;border:1px solid #e3c27a;border-radius:999px;padding:4px 12px;font-size:18px;margin-left:8px}
@@ -122,9 +127,10 @@ input[type=text],select{font:inherit;font-size:16px;padding:7px 10px;border:1px 
     <h2>數白欖是什麼？</h2>
     <p>數白欖是粵劇的「說唱」形式：演員跟著<b>卜魚</b>均勻的「的、的、的」節拍，一句接一句數出來，節奏明快，句尾押韻，像講故事一樣。</p>
     <ul>
-      <li>句數不限，通常兩句一組，句尾押韻</li>
+      <li>句數不限，通常四句一組，句尾押韻</li>
       <li>每句字數可以相同（常見 5–7 字），亦可長短句</li>
       <li>每句最後一個字要落在拍子上</li>
+      <li><b>每組第四句</b>要把<b>最後三個字重覆一次</b>，例如：將功補過切勿發牢騷　<b>發牢騷</b></li>
     </ul>
     <div class="row noprint">
       <span>試聽：</span>
@@ -149,6 +155,7 @@ input[type=text],select{font:inherit;font-size:16px;padding:7px 10px;border:1px 
         </select>
       </label>
     </div>
+    <p class="note">第四句（及第 8、12 句）後面的三個藍色格仔會<b>自動重覆</b>該句最後三個字，不用自己填。</p>
     <div id="sblLines"></div>
 
     <h3>卜魚節拍器</h3>
@@ -195,7 +202,7 @@ function playDik(t){ /* 沙的／卜魚 */
   n.buffer=buf;f.type='highpass';f.frequency.value=3000;ng.gain.value=.4;
   n.connect(f).connect(ng).connect(ctx.destination);n.start(t);
 }
-function playCaang(t){ /* 大鈸（兩片金屬互擊：明亮「鏘」聲 + 金屬沙質餘響） */
+function playCaang(t){ /* 大鈸 */
   const len=Math.floor(ctx.sampleRate*1.4),buf=ctx.createBuffer(1,len,ctx.sampleRate),d=buf.getChannelData(0);
   for(let i=0;i<len;i++)d[i]=Math.random()*2-1;
   const n=ctx.createBufferSource();n.buffer=buf;
@@ -243,9 +250,10 @@ function speak(text,cb){
 
 /* ---------- 填字格（支援速成／筆劃等輸入法組字） ---------- */
 function onlyHan(str){return [...str].filter(c=>!/[\x00-\x7f\s，。、！？「」；：（）]/.test(c))}
-const lastBox={sb:null,sbl:null};   /* 記住每組最後點選的格仔（押韻詞庫填字用） */
+const lastBox={sb:null,sbl:null};
 
-function buildBoxes(container,n,group){
+/* repeatN > 0 時，會在正常格仔之後加入 repeatN 個「重覆尾字」格（自動填入） */
+function buildBoxes(container,n,group,repeatN=0){
   const wrap=document.createElement('div');wrap.className='boxes';
   const boxes=[];
   for(let i=0;i<n;i++){
@@ -260,7 +268,7 @@ function buildBoxes(container,n,group){
       syncWhole(wrap);updatePreview(group);
       const nextIdx=i+chars.length;
       if(boxes[nextIdx])boxes[nextIdx].focus();
-      else{const nextLine=wrap.closest('.line').nextElementSibling;const nb=nextLine&&nextLine.querySelector('.cbox');if(nb)nb.focus();}
+      else{const nextLine=wrap.closest('.line').nextElementSibling;const nb=nextLine&&nextLine.querySelector('.cbox:not(.rep)');if(nb)nb.focus();}
     };
     inp.addEventListener('compositionstart',()=>{composing=true;inp.classList.add('composing')});
     inp.addEventListener('compositionend',()=>{composing=false;inp.classList.remove('composing');setTimeout(commit,0)});
@@ -275,10 +283,19 @@ function buildBoxes(container,n,group){
     });
     boxes.push(inp);wrap.appendChild(inp);
   }
+  /* 重覆尾字格 */
+  if(repeatN>0){
+    const sep=document.createElement('span');sep.className='repsep';sep.textContent='重覆尾'+'一二三四五'[repeatN-1]+'字 →';wrap.appendChild(sep);
+    for(let k=0;k<repeatN;k++){
+      const r=document.createElement('input');r.type='text';r.className='cbox rep';r.readOnly=true;r.tabIndex=-1;r.title='自動重覆本句最後三個字';
+      wrap.appendChild(r);
+    }
+    wrap.dataset.rep=repeatN;
+  }
   container.appendChild(wrap);
 
   const whole=document.createElement('div');whole.className='whole noprint';
-  whole.innerHTML=`<span>整句輸入：</span><input type="text" class="wholeInp" placeholder="在此打整句（${n} 字），會自動分配到格仔">`;
+  whole.innerHTML=`<span>整句輸入：</span><input type="text" class="wholeInp" placeholder="在此打整句（${n} 字），會自動分配到格仔${repeatN?'；尾三字會自動重覆':''}">`;
   const wi=whole.querySelector('input');let wComposing=false;
   const applyWhole=()=>{
     if(wComposing)return;
@@ -292,15 +309,24 @@ function buildBoxes(container,n,group){
   container.appendChild(whole);
   return wrap;
 }
-function syncWhole(wrap){const wi=wrap.parentElement.querySelector('.wholeInp');if(wi)wi.value=[...wrap.querySelectorAll('.cbox')].map(b=>b.value).join('')}
-function lineText(lineEl){return [...lineEl.querySelectorAll('.cbox')].map(b=>b.value).join('')}
-function fillLine(lineEl,str){const bs=lineEl.querySelectorAll('.cbox');[...str].forEach((c,i)=>{if(bs[i]){bs[i].value=c;bs[i].classList.add('filled')}});syncWhole(lineEl.querySelector('.boxes'))}
+/* 把本句最後 N 個字複製到重覆格 */
+function syncRepeat(wrap){
+  const n=+wrap.dataset.rep||0;if(!n)return;
+  const main=[...wrap.querySelectorAll('.cbox:not(.rep)')].map(b=>b.value).join('');
+  const last=[...main].slice(-n);
+  wrap.querySelectorAll('.cbox.rep').forEach((b,k)=>{b.value=last[k]||'';b.classList.toggle('filled',!!b.value)});
+}
+function repText(lineEl){return [...lineEl.querySelectorAll('.cbox.rep')].map(b=>b.value).join('')}
+function syncWhole(wrap){const wi=wrap.parentElement.querySelector('.wholeInp');if(wi)wi.value=[...wrap.querySelectorAll('.cbox:not(.rep)')].map(b=>b.value).join('')}
+function lineText(lineEl){return [...lineEl.querySelectorAll('.cbox:not(.rep)')].map(b=>b.value).join('')}
+/* 整句文字（含重覆尾字），sep 為主句與重覆部分之間的分隔 */
+function fullLineText(lineEl,sep='　'){const m=lineText(lineEl),r=repText(lineEl);return r?m+sep+r:m}
+function fillLine(lineEl,str){const bs=lineEl.querySelectorAll('.cbox:not(.rep)');[...str].forEach((c,i)=>{if(bs[i]){bs[i].value=c;bs[i].classList.add('filled')}});const w=lineEl.querySelector('.boxes');syncWhole(w);syncRepeat(w)}
 function clearBoxes(group){document.querySelectorAll(`#${group}Lines .cbox`).forEach(b=>{b.value='';b.classList.remove('filled')});document.querySelectorAll(`#${group}Lines .wholeInp`).forEach(w=>w.value='');updatePreview(group)}
 function updatePreview(group){group==='sb'?updateSB():updateSBL()}
 function percHTML(p){return [...p].map(c=>`<span class="sym ${c==='撐'?'caang':'dik'}">${c}</span>`).join('')}
 
 /* ===================== 押韻詞庫（將 0243.hk 數據貼入 RHYMES） ===================== */
-/* 格式：韻部名 → 該韻部的字。如果 0243.hk 係「字→韻」格式，用下面 fromDict() 轉換 */
 const RHYMES = {
   "aa（花家）":   ["花","家","霞","華","沙","茶","瓜","蝦","牙","加"],
   "oeng（香揚）": ["香","揚","陽","洋","長","娘","涼","牆","強","張"],
@@ -315,10 +341,6 @@ const RHYMES = fromDict({ "東":"ung", "風":"ung", ... });
 */
 function fromDict(d){ const r={}; for(const [ch,k] of Object.entries(d)) (r[k]=r[k]||[]).push(ch); return r; }
 
-/* 押韻分組（句號 0 起計）：
-   韻組 A = 第一至三句（7 字句）尾字同韻
-   韻組 B = 第四、五句（4 字句 + 3 字句）尾字同韻
-   想改規則只需改這裡。 */
 const RHYME_GROUPS = [
   { id:'g0', name:'第一至三句（韻組 A）', lines:[0,1,2] },
   { id:'g1', name:'第四、五句（韻組 B）', lines:[3,4] }
@@ -346,7 +368,6 @@ SB.forEach((L,i)=>{
   buildBoxes(div,L.n,'sb');sbLines.appendChild(div);
 });
 
-/* 押韻詞庫面板：插在五句格仔之後 */
 const rpanel=document.createElement('div');rpanel.className='rhyme noprint';
 rpanel.innerHTML=`
   <div class="row">
@@ -377,14 +398,11 @@ function insertRhymeChar(ch){
   const bs=[...wrap.querySelectorAll('.cbox')],i=bs.indexOf(inp);
   (bs[i+1]||inp).focus();
 }
-
-/* 取得某句尾字及其韻部 */
 function lineEnd(i){
   const el=document.getElementById('sbL'+i);if(!el)return null;
   const chars=[...lineText(el)],last=chars[chars.length-1];
   return last?{i,last,k:charRhyme(last)}:null;
 }
-/* 檢查一個韻組，回傳 {state:'none'|'wait'|'ok'|'bad', text} */
 function checkGroup(g){
   const ends=g.lines.map(lineEnd).filter(Boolean);
   const names=g.lines.map(j=>NUM[j]).join('、');
@@ -396,7 +414,6 @@ function checkGroup(g){
   if(ks.length===1)return{state:'ok',text:`✓ ${g.name}押韻：${ends.map(e=>e.last).join('、')} 同屬 ${ks[0]}${partial}`};
   return{state:'bad',text:`✗ ${g.name}未同韻：${ends.map(e=>`${e.last}（${e.k}）`).join(' / ')}`};
 }
-/* 每句尾字提示 + 兩組結果 */
 function rhymeCheck(){
   RHYME_GROUPS.forEach(g=>g.lines.forEach(i=>{
     const st=document.getElementById('sbR'+i),e=lineEnd(i);if(!st)return;
@@ -412,21 +429,18 @@ function rhymeCheck(){
   });
   return results;
 }
-/* 「檢查押韻」按鈕：即時總結兩組 */
 function checkRhymeNow(){
   const r=rhymeCheck();
   const lines=RHYME_GROUPS.map(g=>r[g.id].text);
   const allOk=RHYME_GROUPS.every(g=>r[g.id].state==='ok');
   toast((allOk?'🎉 兩組都押韻！　':'')+lines.join('　｜　'),3500);
 }
-/* 點選格仔時，自動顯示該句所屬韻組的韻字 */
 function onSbFocus(inp){
   const li=+inp.closest('.line').id.replace('sbL','');
   const g=groupOfLine(li);if(!g)return;
   const known=g.lines.map(lineEnd).find(e=>e&&e.k&&e.i!==li)||g.lines.map(lineEnd).find(e=>e&&e.k);
   if(known)showRhyme(known.k);
 }
-
 function sbText(){
   const title=document.getElementById('sbTitle').value,name=document.getElementById('sbName').value;
   let s=(title?`《${title}》`:'')+(name?`　${name}`:'')+(title||name?'\n':'');
@@ -448,34 +462,46 @@ function reciteSB(withVoice){
 }
 function loadSampleSB(){
   clearBoxes('sb');document.getElementById('sbTitle').value='春日';
-  /* 韻組 A：花／霞／家（aa）　韻組 B：香／洋（oeng） */
   ['春風吹綻滿園花','蝶舞鶯啼映彩霞','燕子雙雙歸舊家','鳥語花香','樂洋洋'].forEach((s,i)=>fillLine(document.getElementById('sbL'+i),s));updateSB();
 }
 updateSB();
 
 /* ---------- 數白欖 ---------- */
+const SBL_REPEAT_EVERY=4;   /* 每 4 句的第 4 句要重覆尾字；只想第四句一句的話改成 0，並在下面用 i===3 判斷 */
+const SBL_REPEAT_N=3;       /* 重覆最後 3 個字 */
+function isRepeatLine(i){return SBL_REPEAT_EVERY>0 ? (i%SBL_REPEAT_EVERY===SBL_REPEAT_EVERY-1) : i===3}
+
 function rebuildSBL(){
   const n=+document.getElementById('sblN').value,rows=+document.getElementById('sblRows').value;
   const old=[...document.querySelectorAll('#sblLines .line')].map(lineText);
   const c=document.getElementById('sblLines');c.innerHTML='';
   for(let i=0;i<rows;i++){
-    const div=document.createElement('div');div.className='line';div.id='sblL'+i;
-    div.innerHTML=`<span class="lbl">第 ${i+1} 句</span><span class="perc">（${percHTML('的'.repeat(Math.min(n,4)))}…）</span>
+    const rep=isRepeatLine(i);
+    const div=document.createElement('div');div.className='line'+(rep?' repline':'');div.id='sblL'+i;
+    div.innerHTML=`<span class="lbl">第 ${i+1} 句${rep?`（${n}＋${SBL_REPEAT_N} 字，重覆尾三字）`:''}</span><span class="perc">（${percHTML('的'.repeat(Math.min(n,4)))}…）</span>
       <button class="btn ghost noprint" style="padding:3px 10px;font-size:13px" onclick="reciteOneSBL(${i})">朗讀此句</button>`;
-    buildBoxes(div,n,'sbl');c.appendChild(div);if(old[i])fillLine(div,old[i]);
+    buildBoxes(div,n,'sbl',rep?SBL_REPEAT_N:0);c.appendChild(div);if(old[i])fillLine(div,old[i]);
   }
   updateSBL();
 }
 function sblText(){
   const title=document.getElementById('sblTitle').value,name=document.getElementById('sblName').value;
   let s=(title?`《${title}》`:'')+(name?`　${name}`:'')+(title||name?'\n':'');
-  document.querySelectorAll('#sblLines .line').forEach((el,i)=>{const t=lineText(el);if(t)s+=t+(i%2?'。':'，')+'\n'});return s.trim();
+  document.querySelectorAll('#sblLines .line').forEach((el,i)=>{const t=fullLineText(el,'　');if(t)s+=t+(i%2?'。':'，')+'\n'});return s.trim();
 }
-function updateSBL(){document.getElementById('sblPreview').textContent=sblText()}
+function updateSBL(){
+  document.querySelectorAll('#sblLines .boxes').forEach(syncRepeat);
+  document.getElementById('sblPreview').textContent=sblText();
+}
 document.getElementById('sblTitle').oninput=document.getElementById('sblName').oninput=updateSBL;
 function reciteOneSBL(i,cb){
   const el=document.getElementById('sblL'+i);if(!el)return;el.classList.add('speaking');
-  playPattern('的的',el,()=>speak(lineText(el),()=>playPattern('的',el,()=>{el.classList.remove('speaking');cb&&cb()})));
+  const main=lineText(el),rep=repText(el);
+  const finish=()=>playPattern('的',el,()=>{el.classList.remove('speaking');cb&&cb()});
+  playPattern('的的',el,()=>speak(main,()=>{
+    if(rep)playPattern('的',el,()=>speak(rep,finish));   /* 讀完主句，打一下卜魚，再重覆尾三字 */
+    else finish();
+  }));
 }
 function reciteSBL(){stopAll();initAudio();const lines=[...document.querySelectorAll('#sblLines .line')].filter(l=>lineText(l));let i=0;
   const next=()=>{if(i>=lines.length)return;const idx=+lines[i++].id.replace('sblL','');reciteOneSBL(idx,next)};next();}
