@@ -467,7 +467,7 @@ function loadSampleSB(){
 updateSB();
 
 /* ---------- 數白欖 ---------- */
-const SBL_REPEAT_EVERY=4;   /* 每 4 句的第 4 句要重覆尾字；只想第四句一句的話改成 0，並在下面用 i===3 判斷 */
+const SBL_REPEAT_EVERY=4;   /* 每 4 句的第 4 句要重覆尾字；只想第四句一句重覆的話改成 0 */
 const SBL_REPEAT_N=3;       /* 重覆最後 3 個字 */
 function isRepeatLine(i){return SBL_REPEAT_EVERY>0 ? (i%SBL_REPEAT_EVERY===SBL_REPEAT_EVERY-1) : i===3}
 
